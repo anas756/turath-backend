@@ -3,19 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model; // Critical: Import MongoDB Model
-use MongoDB\Laravel\Eloquent\SoftDeletes; // Add this for deleted_at handling
+use MongoDB\Laravel\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use MongoDB\Laravel\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Model
+class User extends Authenticatable implements JWTSubject
 {
-    /** * MongoDB Connection 
-     * Only necessary if your default connection is not mongodb 
-     */
+     use HasFactory, Notifiable, SoftDeletes ,HasApiTokens ;
+   
     protected $connection = 'mongodb';
-    protected $collection = 'users'; // In MongoDB, tables are called "collections"
+    protected $collection = 'users';
 
-    use HasFactory, Notifiable, SoftDeletes;
+   
 
     /**
      * The attributes that are mass assignable.
@@ -56,5 +57,17 @@ class User extends Model
         ];
     }
 
-  
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+    public function CheckUserAuthOrAdminRole($userAuth)
+    {
+        return $this->id ==  $userAuth->id || $userAuth->role == "admin";
+    }
 }

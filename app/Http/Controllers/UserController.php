@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
+use App\Policies\UserPolicy;
 use App\Services\UserServices;
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log; // Fixed the Log import
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log; 
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
     protected $userServices;
 
     public function __construct(UserServices $userServices)
@@ -90,7 +92,13 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-            $updatedUser = $this->userServices->updateUser($request->validated(), $user);
+             // chekc policy 
+            $this->authorize('update', $user);
+            // validated data
+            $validated = $request->validated();
+           
+
+            $updatedUser = $this->userServices->updateUser($validated, $user);
 
             return response()->json([
                 'success' => true,
@@ -112,13 +120,8 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
-            
-            if (auth()->id() === $user->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Security: You cannot delete your own account from this panel.'
-                ], 403);
-            }
+            $this->authorize('destroy', $user);
+         
 
             $this->userServices->deleteUser($user);
 
