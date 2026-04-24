@@ -6,23 +6,27 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
 use App\Policies\UserPolicy;
+use App\Services\UserMailServices;
 use App\Services\UserServices;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
     use AuthorizesRequests;
-    protected $userServices;
+    protected $userServices, $userMailServices;
 
-    public function __construct(UserServices $userServices)
+    public function __construct(UserServices $userServices, UserMailServices $userMailServices)
     {
         $this->userServices = $userServices;
+        $this->userMailServices = $userMailServices;
     }
 
     /**
-     * Display a listing of the resource.
+     * Afficher la liste des utilisateurs.
      */
     public function index()
     {
@@ -31,45 +35,55 @@ class UserController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Users fetched successfully',
+                'message' => 'Utilisateurs récupérés avec succès',
                 'data'    => $allUsers
             ], 200);
         } catch (Exception $e) {
-            Log::error("Index Error: " . $e->getMessage());
+            Log::error("Erreur Index : " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch users',
+                'message' => 'Échec de la récupération des utilisateurs',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Store a newly created user.
+     * Créer un nouvel utilisateur.
      */
     public function store(StoreUserRequest $request)
     {
         try {
             $validated = $request->validated();
-            $userCreated = $this->userServices->createUser($validated);
+           
+
+            $token = Str::random(60); 
+            $validated['auth_tokens'] = $token ? [
+                'token'            => $token,
+                'role'             => 'confirm email',
+                'used'             => false,
+                'token_expires_at' => Carbon::now()->addHours(24)->toISOString(),
+            ] : null;
+            $userCreated = $this->userServices->createUser($validated , $token);
+            $this->userMailServices->send_confirme_acount($token, $userCreated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'User created successfully',
+                'message' => 'Utilisateur créé avec succès. Veuillez confirmer votre adresse e-mail.',
                 'data'    => $userCreated
             ], 201);
         } catch (Exception $e) {
-            Log::error("Store Error: " . $e->getMessage());
+            Log::error("Erreur Store : " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'User creation failed',
+                'message' => 'Échec de la création de l\'utilisateur',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Display the specified resource.
+     * Afficher un utilisateur spécifique.
      */
     public function show(User $user)
     {
@@ -81,32 +95,32 @@ class UserController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found',
+                'message' => 'Utilisateur introuvable',
             ], 404);
         }
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mettre à jour un utilisateur.
      */
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-             // chekc policy 
+            // Vérifier la policy
             $this->authorize('update', $user);
-            // validated data
+
+            // Données validées
             $validated = $request->validated();
-           
 
             $updatedUser = $this->userServices->updateUser($validated, $user);
 
             return response()->json([
                 'success' => true,
-                'message' => 'User updated successfully',
+                'message' => 'Utilisateur mis à jour avec succès',
                 'data' => $updatedUser
             ], 200);
         } catch (Exception $e) {
-            Log::error("Update Error: " . $e->getMessage());
+            Log::error("Erreur Update : " . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -115,26 +129,28 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprimer un utilisateur.
      */
     public function destroy(User $user)
     {
         try {
             $this->authorize('destroy', $user);
-         
 
             $this->userServices->deleteUser($user);
 
             return response()->json([
                 'success' => true,
-                'message' => 'User deleted successfully'
+                'message' => 'Utilisateur supprimé avec succès'
             ], 200);
         } catch (Exception $e) {
-            Log::error("Delete Error: " . $e->getMessage());
+            Log::error("Erreur Suppression : " . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
     }
+
+
+    
 }

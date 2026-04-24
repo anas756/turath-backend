@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
+use App\Services\UserMailServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    protected $userMailServices ; 
+    public function __construct(UserMailServices $userMailServices) {
+        $this->userMailServices = $userMailServices;
+    }
    
     public function login(LoginRequest $request)
     {
@@ -27,6 +34,9 @@ class AuthController extends Controller
                     'success' => false,
                     'message' => 'Invalid credentials' 
                 ], 401);
+            }
+            if(!$user->confirmed){
+
             }
             //  Update login metadata
             $user->update([
@@ -81,6 +91,55 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'An error occurred during logout',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function manualSendEmailValidation(Request $request)  {
+        try {
+            $validated = $request->validate([
+                'email' => ['required', 'email', 'exists:users,email']
+            ]);
+            $user = User::where('email', $validated['email'])->first();
+            // check user 
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur introuvable'
+                ], 404);  
+            }
+            // Check if already confirmed
+            if ($user->confirmed) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Votre email est déjà confirmé'
+                ], 400);
+            }
+            $token = Str::random(60);
+            $user->auth_tokens = [
+                'token'            => $token,
+                'role'             => 'confirm email',
+                'used'             => false,
+                'token_expires_at' => Carbon::now()->addHours(24)->toISOString(),
+            ];
+            $user->save();
+
+            $this->userMailServices->send_confirme_acount($token , $user);
+            return response()->json([
+                'success' => true,
+                'message' => 'Email de confirmation envoyé avec succès'
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email invalide ou introuvable',
+                'errors'  => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            Log::error("Manual Send Email Error: " . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'envoi de l\'email',
+                'error'   => $th->getMessage()
             ], 500);
         }
     }

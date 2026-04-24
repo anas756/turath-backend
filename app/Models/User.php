@@ -30,7 +30,8 @@ class User extends Authenticatable implements JWTSubject
         'role',
         'confirmed',
         'is_login',
-        'user_token',
+        'auth_tokens',
+        'code_verefication_email',
         'last_login',
     ];
 
@@ -39,8 +40,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
-        'remember_token',
-        'user_token', 
+        'auth_tokens',
+        'code_verefication_email'
     ];
 
     /**
@@ -70,4 +71,5 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->id ==  $userAuth->id || $userAuth->role == "admin";
     }
+
 }
