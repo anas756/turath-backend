@@ -11,11 +11,12 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ConfirmAcount extends Mailable
+class sendResetPassTokenMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $user;
     public $confirmationToken;
+
 
     /**
      * Create a new message instance.
@@ -32,7 +33,7 @@ class ConfirmAcount extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirme ton Email Address',
+            subject: 'Send Reset Pass Token Mail',
         );
     }
 
@@ -42,8 +43,8 @@ class ConfirmAcount extends Mailable
     public function content(): Content
     {
         $title = 'Email Confirmation';
-        $confirmationUrl = url("/api/users/email-confirm/{$this->user->email}?token=" . urlencode($this->confirmationToken));
-       return new Content(
+        $confirmationUrl = url("/api/users/verifyResetToken/{$this->user->email}?token=" . urlencode($this->confirmationToken));
+        return new Content(
             view: 'users.confirmAcount',
             with: [
                 'title' => $title,

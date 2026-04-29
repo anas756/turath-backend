@@ -10,7 +10,9 @@ use App\Services\UserMailServices;
 use App\Services\UserServices;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -60,11 +62,11 @@ class UserController extends Controller
             $token = Str::random(60); 
             $validated['auth_tokens'] = $token ? [
                 'token'            => $token,
-                'role'             => 'confirm email',
+                'role'             => 'confim acount',
                 'used'             => false,
                 'token_expires_at' => Carbon::now()->addHours(24)->toISOString(),
             ] : null;
-            $userCreated = $this->userServices->createUser($validated , $token);
+            $userCreated = $this->userServices->createUser($validated);
             $this->userMailServices->send_confirme_acount($token, $userCreated);
 
             return response()->json([
@@ -149,6 +151,30 @@ class UserController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|min:8|confirmed', 
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $user->auth_tokens['token'] !== $request->token) {
+            return response()->json(['message' => 'Action non autorisée'], 403);
+        }
+
+        
+        $user->update([
+            'password' => Hash::make($request->password),
+            'auth_tokens' => null
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Mot de passe mis à jour !']);
     }
 
 

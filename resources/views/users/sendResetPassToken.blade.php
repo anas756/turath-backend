@@ -48,19 +48,21 @@
         
         <p>Bonjour <strong>{{ $userName }}</strong>,</p>
         
-        <p>Merci pour votre inscription. Pour finaliser la création de votre compte, merci de confirmer votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>
+        <p>Vous recevez cet e-mail car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.</p>
+        
+        <p>Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
         
         <center>
-            <a href="{{ $confirmationUrl }}" class="button">Vérifier mon adresse e-mail</a>
+            <a href="{{ $confirmationUrl }}" class="button">Réinitialiser mon mot de passe</a>
         </center>
         
-        <p>Si le bouton ne s'affiche pas correctement, copiez et collez le lien suivant dans votre navigateur :</p>
+        <p>Si le bouton ne s'affiche pas, copiez et collez ce lien dans votre navigateur :</p>
         <p class="link-alt">{{ $confirmationUrl }}</p>
         
-        <p><strong>Note :</strong> Ce lien est valable pendant 24 heures.</p>
+        <p><strong>Attention :</strong> Ce lien est à usage unique et expirera dans 1 heure.</p>
         
         <div class="footer">
-            <p>Si vous n'avez pas demandé la création de ce compte, vous pouvez ignorer cet e-mail en toute sécurité.</p>
+            <p>Si vous n'avez pas demandé de réinitialisation, aucune action n'est requise. Votre mot de passe actuel restera inchangé.</p>
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits réservés.</p>
         </div>
     </div>

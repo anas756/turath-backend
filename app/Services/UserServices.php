@@ -13,16 +13,11 @@ class UserServices
     /**
      * Create a new user.
      */
-    public function createUser(array $data , $token): ?User
+    public function createUser(array $data ): ?User
     {
         try {
-            $token_expired_at = null ;
             if (isset($data['password'])) {
                 $data['password'] = $this->hashPass($data['password']);
-            }
-            if($token) {
-                $token_expired_at = Carbon::now()->addHours(24);
-               
             }
             $data['confirmed'] = false;
             $data['is_login'] = false;

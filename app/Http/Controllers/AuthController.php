@@ -73,9 +73,6 @@ class AuthController extends Controller
                     'message' => 'Not authenticated'
                 ], 401);
             }
-
-          
-            
             //  Update custom login status in MongoDB
             $user->update([
                 'is_login' => false,
@@ -115,6 +112,9 @@ class AuthController extends Controller
                 ], 400);
             }
             $token = Str::random(60);
+            $user->update([
+                'auth_tokens' => null
+            ]);
             $user->auth_tokens = [
                 'token'            => $token,
                 'role'             => 'confirm email',
@@ -140,6 +140,55 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Erreur lors de l\'envoi de l\'email',
                 'error'   => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sendResetPassToken(Request $request)  {
+        try {
+            // get email from query 
+           $email = $request->query('email');
+        //    find user 
+           $user = User::where('email' ,$email)->first();
+        //    check user exist 
+        if(!$user){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Si cet email existe, un lien de réinitialisation a été envoyé.'
+                ]);
+        }
+        // generate token 
+        $token = Str::random(60);
+        // remove old token 
+          $user->update([
+            'auth_tokens' =>null
+        ]);
+        // update user data
+        $user->update([
+            'auth_tokens' => [
+                'token' => $token, 
+                'role'  => 'reset password',
+                'used'  => false,
+                "confirmed" => false , 
+                'token_expires_at' => now()->addMinutes(5)->toISOString() 
+            ]
+        ]);
+      
+
+    //  send email verefication
+    $this->userMailServices->send_reset_pass_token($token , $user);
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'E-mail de réinitialisation envoyé avec succès.'
+            ]);
+        } catch (\Throwable $th) {
+            Log::error("Reset Password Error: " . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de l\'envoi.',
+                'error' => $th->getMessage()
             ], 500);
         }
     }
