@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\checkAppTokenSecret;
 use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -11,33 +13,46 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 */
+// protected by secret key
+Route::middleware([checkAppTokenSecret::class])->group(function() {
+    // auth 
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [UserController::class, 'store']);
+    // categorie
+    Route::apiResource('categories', CategorieController::class)
+        ->only(['show', 'index']);
+    // auth
+    Route::prefix('auth')->group(function () {
+        // acount confirmation
+        Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
+        Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
 
-// PUBLIC ROUTES
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [UserController::class, 'store']);
-// AUTH ROUTES
-Route::prefix('auth')->group(function () {
-    // ACOUNT CONFIRMATION
-    Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
-    Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
-
-    // PASSWORD RESET 
-    Route::post('forgot-password', [AuthController::class, 'sendResetPassToken']);
-    Route::get('verify-reset-token/{email}', [emailConfirmation::class, 'verifyResetToken']);
-    Route::post('reset-password', [UserController::class, 'updatePassword']);
-});
-
-
-// PROTECTED ROUTS
-Route::middleware([JwtAuthMiddleware::class])->group(function () {
-
-    // AUTH
-    Route::post('logout', [AuthController::class, 'logout']);
-
-    // USER CRUD
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index']);      // GET /users (Liste tout)
-        Route::put('{user}', [UserController::class, 'update']); // PUT /users/{id}
-        Route::delete('{user}', [UserController::class, 'destroy']); // DELETE /users/{id}
+        // password reset
+        Route::post('forgot-password', [AuthController::class, 'sendResetPassToken']);
+        Route::get('verify-reset-token/{email}', [emailConfirmation::class, 'verifyResetToken']);
+        Route::post('reset-password', [UserController::class, 'updatePassword']);
     });
+
+
+    // protected by jwt
+    Route::middleware([JwtAuthMiddleware::class])->group(function () {
+
+        // auth
+        Route::post('logout', [AuthController::class, 'logout']);
+
+        // user
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::put('{user}', [UserController::class, 'update']); 
+            Route::delete('{user}', [UserController::class, 'destroy']); 
+            
+        });
+        // categorie
+        Route::apiResource('categories', CategorieController::class)->except(['show', 'index']);
+
+    });
+    
+
+
+
 });

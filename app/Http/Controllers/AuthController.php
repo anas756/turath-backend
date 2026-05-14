@@ -66,7 +66,7 @@ class AuthController extends Controller
             JWTAuth::invalidate(JWTAuth::getToken());
             //  Get the currently authenticated user from the Sanctum guard
             $user = auth('api')->user();
-
+            // check user 
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -93,9 +93,11 @@ class AuthController extends Controller
     }
     public function manualSendEmailValidation(Request $request)  {
         try {
+            // validate data
             $validated = $request->validate([
                 'email' => ['required', 'email', 'exists:users,email']
             ]);
+            // find user 
             $user = User::where('email', $validated['email'])->first();
             // check user 
             if (!$user) {
@@ -111,7 +113,9 @@ class AuthController extends Controller
                     'message' => 'Votre email est déjà confirmé'
                 ], 400);
             }
+            // gererate token
             $token = Str::random(60);
+            // update user info 
             $user->update([
                 'auth_tokens' => null
             ]);
@@ -122,7 +126,7 @@ class AuthController extends Controller
                 'token_expires_at' => Carbon::now()->addHours(24)->toISOString(),
             ];
             $user->save();
-
+            // service send confirm 
             $this->userMailServices->send_confirme_acount($token , $user);
             return response()->json([
                 'success' => true,
@@ -175,7 +179,7 @@ class AuthController extends Controller
         ]);
       
 
-    //  send email verefication
+    //  service send email verefication
     $this->userMailServices->send_reset_pass_token($token , $user);
 
 

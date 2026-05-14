@@ -17,9 +17,10 @@ class emailConfirmation extends Controller
     public function confirmingEmail(Request $request , $email)
     {
         try {
+            // get token 
             $token = $request->query('token');
+            // find user 
             $user = User::where('email', $email)->first(); 
-
             if (!$user  ) {
                 return response()->json([
                     'success' => false,
@@ -43,7 +44,7 @@ class emailConfirmation extends Controller
                     'message' => 'Le lien a expiré'
                 ], 403);
             }
-
+            // sevice confirm email 
             $this->userServices->confirmEmail($user);
 
             return response()->json([
@@ -62,11 +63,11 @@ class emailConfirmation extends Controller
     public function verifyResetToken(Request $request, $email)
     {
         try {
+            // get token 
             $tokenFromUrl = $request->query('token');
 
             // find user 
             $user = User::where('email', $email)->first();
-
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'Utilisateur introuvable'], 404);
             }
@@ -95,11 +96,10 @@ class emailConfirmation extends Controller
                     'message' => 'Ce lien a expiré (validité de 1h).'
                 ], 403);
             }
-
+            $authData['confirmed'] = true ; 
+            // update user info 
             $user->update([
-                'auth_tokens' => [
-                    'confirmed' => true
-                ]
+                'auth_tokens' => $authData  
             ]);
             return response()->json([
                 'success' => true,

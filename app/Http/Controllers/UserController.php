@@ -33,8 +33,8 @@ class UserController extends Controller
     public function index()
     {
         try {
+            // fetch all users
             $allUsers = User::all();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Utilisateurs récupérés avec succès',
@@ -56,9 +56,9 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         try {
+            // validation
             $validated = $request->validated();
-           
-
+            // generate token
             $token = Str::random(60); 
             $validated['auth_tokens'] = $token ? [
                 'token'            => $token,
@@ -66,9 +66,9 @@ class UserController extends Controller
                 'used'             => false,
                 'token_expires_at' => Carbon::now()->addHours(24)->toISOString(),
             ] : null;
+            // service store
             $userCreated = $this->userServices->createUser($validated);
             $this->userMailServices->send_confirme_acount($token, $userCreated);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Utilisateur créé avec succès. Veuillez confirmer votre adresse e-mail.',
@@ -108,12 +108,11 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-            // Vérifier la policy
+            //policie 
             $this->authorize('update', $user);
-
-            // Données validées
+            //validation
             $validated = $request->validated();
-
+            // service update 
             $updatedUser = $this->userServices->updateUser($validated, $user);
 
             return response()->json([
@@ -136,8 +135,9 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
+            // policie
             $this->authorize('destroy', $user);
-
+            // service delete
             $this->userServices->deleteUser($user);
 
             return response()->json([
@@ -156,25 +156,34 @@ class UserController extends Controller
     
     public function updatePassword(Request $request)
     {
-        $request->validate([
+        try {
+            // validation
+               $request->validate([
             'email' => 'required|email',
             'token' => 'required',
             'password' => 'required|min:8|confirmed', 
         ]);
-
+        // find user by email 
         $user = User::where('email', $request->email)->first();
-
+        // check user and token exist 
         if (!$user || $user->auth_tokens['token'] !== $request->token) {
             return response()->json(['message' => 'Action non autorisée'], 403);
         }
-
-        
+        // update user 
         $user->update([
             'password' => Hash::make($request->password),
             'auth_tokens' => null
         ]);
 
         return response()->json(['success' => true, 'message' => 'Mot de passe mis à jour !']);
+        } catch (\Throwable $th) {
+            Log::error("Erreur Suppression : " . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+     
     }
 
 

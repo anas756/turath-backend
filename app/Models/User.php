@@ -56,16 +56,16 @@ class User extends Authenticatable implements JWTSubject
             'last_login' => 'datetime',
         ];
     }
-
+    // get JWT key
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
-
     public function getJWTCustomClaims()
     {
         return [];
     }
+    // check auth id with same user id or role admin
     public function CheckUserAuthOrAdminRole($userAuth)
     {
         return $this->id ==  $userAuth->id || $userAuth->role == "admin";
