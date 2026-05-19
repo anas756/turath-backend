@@ -16,6 +16,7 @@ class Book extends Model
         'description',
         'authors',
         'cover',
+        'file_path',
         'categorie_id',
         'tags',
     ];

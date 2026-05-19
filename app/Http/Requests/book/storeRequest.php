@@ -28,8 +28,10 @@ class storeRequest extends FormRequest
             'authors'         => 'required|array|min:1',
             'authors.*'       => 'required|string|max:255',
 
-            'cover'           => 'nullable|string', // URL string or path
-            'categorie_id'    => 'required|string', // String matching your categories MongoDB ID
+            'cover'           => 'nullable|string', 
+            'categorie_id'    => 'required|string',
+
+            'file_path'       => 'required|file|mimes:pdf,epub,txt|max:102400',
 
             'tags'            => 'nullable|array',
             'tags.*'          => 'string|max:50',

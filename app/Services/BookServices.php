@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Book;
 use Exception;
+use Illuminate\Http\UploadedFile;
 
 class BookServices
 {
@@ -12,7 +13,6 @@ class BookServices
      */
     public function index()
     {
-        // Added ->get() to execute the query and fetch the collection
         return Book::with('categories')->get();
     }
 
@@ -21,6 +21,11 @@ class BookServices
      */
     public function store(array $data)
     {
+        // Check if the data array contains a valid uploaded file instance
+        if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+            // Save file to storage and replace the file object with the path string
+            $data['file_path'] = $this->storeFile($data['file_path']);
+        }
         return Book::create($data);
     }
 
@@ -33,10 +38,8 @@ class BookServices
         if ($this->hasOpenLibraryId($book)) {
             throw new Exception("Cannot update books synced from the Open Library API.");
         }
-
         // Perform update
         $book->update($data);
-
         // Return the updated book instance
         return $book->fresh();
     }
@@ -50,7 +53,6 @@ class BookServices
         if ($this->hasOpenLibraryId($book)) {
             throw new Exception("Cannot delete books synced from the Open Library API.");
         }
-
         // Perform delete
         return $book->delete();
     }
@@ -63,4 +65,10 @@ class BookServices
     {
         return !empty($book->open_library_id);
     }
+
+    // store file in storage 
+    public function storeFile($file)  {
+        return $file->store('books', 'public');
+    }
+
 }
