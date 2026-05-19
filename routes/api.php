@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookContentController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\emailConfirmation;
@@ -29,6 +30,15 @@ use Illuminate\Support\Facades\Route;
         ->only(['show', 'index']);
     // books
     Route::apiResource('book', BookController::class)->only(['show', 'index']);
+    // search book using word 
+    Route::get('search/library', [BookContentController::class, 'searchLibrer']);
+
+    // search inside book and get book content
+    Route::prefix('books/{book_id}')->group(function () {
+        Route::get('pages', [BookContentController::class, 'getContentByBook']);
+        Route::get('search', [BookContentController::class, 'searchInsideBook']);
+    });
+    
     // auth
     Route::prefix('auth')->group(function () {
         // acount confirmation
