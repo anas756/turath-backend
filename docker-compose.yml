@@ -1,0 +1,31 @@
+services:
+  turath-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: turath_laravel_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - turath-mongo
+    networks:
+      - turath-network
+
+  turath-mongo:
+    image: mongo:latest
+    container_name: turath_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - turath-network
+
+volumes:
+  mongo_data:
+
+networks:
+  turath-network:
+    driver: bridge
