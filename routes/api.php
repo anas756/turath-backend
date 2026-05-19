@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
@@ -14,13 +15,20 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 // protected by secret key
-Route::middleware([checkAppTokenSecret::class])->group(function() {
+
+// Route::middleware([checkAppTokenSecret::class])->group(function() {
+
+
+
+
     // auth 
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [UserController::class, 'store']);
     // categorie
     Route::apiResource('categories', CategorieController::class)
         ->only(['show', 'index']);
+    // books
+    Route::apiResource('book', BookController::class)->only(['show', 'index']);
     // auth
     Route::prefix('auth')->group(function () {
         // acount confirmation
@@ -49,10 +57,11 @@ Route::middleware([checkAppTokenSecret::class])->group(function() {
         });
         // categorie
         Route::apiResource('categories', CategorieController::class)->except(['show', 'index']);
+        Route::apiResource('book' , BookController::class)->except(['show', 'index']);
 
     });
     
 
 
 
-});
+// });
