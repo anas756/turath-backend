@@ -21,7 +21,12 @@ class Book extends Model
     ];
 
     // relations 
+    // categories
     public function categories()  {
         return $this->belongsTo(Categorie::class , 'categorie_id');
+    }
+    // book_contents
+    public function contents()  {
+        return  $this->hasMany(BookContent::class , 'book_id');
     }
 }
