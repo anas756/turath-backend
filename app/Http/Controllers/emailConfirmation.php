@@ -9,55 +9,39 @@ use Illuminate\Support\Facades\Log;
 
 class emailConfirmation extends Controller
 {
-    protected $userServices ; 
-    public function __construct(UserServices $userServices) {
+    protected $userServices;
+    public function __construct(UserServices $userServices)
+    {
         $this->userServices = $userServices;
     }
 
-    public function confirmingEmail(Request $request , $email)
+    public function confirmingEmail(Request $request, $email)
     {
         try {
             // get token 
             $token = $request->query('token');
             // find user 
-            $user = User::where('email', $email)->first(); 
-            if (!$user  ) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Token invalide ou utilisateur introuvable'
-                ], 404);
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                return redirect('http://localhost:3000/email-confirmed?status=error&reason=not_found');
             }
             $authData = $user->auth_tokens;
 
             // check token exist and used
             if (!$authData || $authData['token'] !== $token || ($authData['used'] ?? false)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Token invalide ou déjà utilisé'
-                ], 403);
+                return redirect('http://localhost:3000/email-confirmed?status=error&reason=invalid_token');
             }
 
             //  Check Expiration
             if (now()->gt(\Carbon\Carbon::parse($authData['token_expires_at']))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Le lien a expiré'
-                ], 403);
+                return redirect('http://localhost:3000/email-confirmed?status=error&reason=expired');
             }
             // sevice confirm email 
             $this->userServices->confirmEmail($user);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Email confirmé avec succès'
-            ], 200);
+            return redirect('http://localhost:3000/email-confirmed?status=success');
         } catch (\Throwable $th) {
             Log::error("Confirm Email Error: " . $th->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la confirmation',
-                'error'   => $th->getMessage()
-            ], 500);
+            return redirect('http://localhost:3000/email-confirmed?status=error&reason=server_error');
         }
     }
     public function verifyResetToken(Request $request, $email)
@@ -96,21 +80,29 @@ class emailConfirmation extends Controller
                     'message' => 'Ce lien a expiré (validité de 1h).'
                 ], 403);
             }
-            $authData['confirmed'] = true ; 
+            $authData['confirmed'] = true;
             // update user info 
             $user->update([
-                'auth_tokens' => $authData  
+                'auth_tokens' => $authData
             ]);
             return response()->json([
                 'success' => true,
                 'message' => 'Token valide. Vous pouvez modifier votre mot de passe.',
                 'data' => [
                     'email' => $email,
-                    'token' => $tokenFromUrl 
+                    'token' => $tokenFromUrl
                 ]
             ], 200);
         } catch (\Throwable $th) {
             return response()->json(['success' => false, 'error' => $th->getMessage()], 500);
         }
+    }
+    public function checkVerified($email)
+    {
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return response()->json(['verified' => false], 404);
+        }
+        return response()->json(['verified' => (bool) $user->confirmed], 200);
     }
 }

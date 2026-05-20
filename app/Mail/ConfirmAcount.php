@@ -42,7 +42,7 @@ class ConfirmAcount extends Mailable
     public function content(): Content
     {
         $title = 'Email Confirmation';
-        $confirmationUrl = url("/api/users/email-confirm/{$this->user->email}?token=" . urlencode($this->confirmationToken));
+        $confirmationUrl = url("/api/auth/email-confirm/{$this->user->email}?token=" . urlencode($this->confirmationToken));
        return new Content(
             view: 'users.confirmAcount',
             with: [
