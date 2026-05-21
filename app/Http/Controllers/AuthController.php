@@ -158,16 +158,16 @@ class AuthController extends Controller
     public function sendResetPassToken(Request $request)  {
         try {
             // get email from query 
-           $email = $request->query('email');
+           $email = $request->input('email');
         //    find user 
            $user = User::where('email' ,$email)->first();
-        //    check user exist 
-        if(!$user){
+            //    check user exist 
+            if (!$user) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Si cet email existe, un lien de réinitialisation a été envoyé.'
-                ]);
-        }
+                    'success' => false,
+                    'message' => 'Cet e-mail n\'existe pas dans notre base de données.'
+                ], 404);
+            }
         // generate token 
         $token = Str::random(60);
         // remove old token 
@@ -181,7 +181,7 @@ class AuthController extends Controller
                 'role'  => 'reset password',
                 'used'  => false,
                 "confirmed" => false , 
-                'token_expires_at' => now()->addMinutes(5)->toISOString() 
+                'token_expires_at' => now()->addMinutes(10)->toISOString() 
             ]
         ]);
       
@@ -193,7 +193,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'E-mail de réinitialisation envoyé avec succès.'
-            ]);
+            ],200);
         } catch (\Throwable $th) {
             Log::error("Reset Password Error: " . $th->getMessage());
             return response()->json([

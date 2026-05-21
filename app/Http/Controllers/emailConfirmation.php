@@ -47,56 +47,54 @@ class emailConfirmation extends Controller
     public function verifyResetToken(Request $request, $email)
     {
         try {
-            // get token 
+            // Get token from the URL query string
             $tokenFromUrl = $request->query('token');
 
-            // find user 
+            //  Find user 
             $user = User::where('email', $email)->first();
             if (!$user) {
-                return response()->json(['success' => false, 'message' => 'Utilisateur introuvable'], 404);
+                return redirect('http://localhost:3000/reset-token-confirmed?status=error&reason=' . urlencode('Utilisateur introuvable'));
             }
 
-            // recive token from db
+            //  Receive token array from MongoDB
             $authData = $user->auth_tokens;
 
-            // securety 
+            //  Security checks
             if (
                 !$authData ||
                 $authData['role'] !== 'reset password' ||
                 $authData['token'] !== $tokenFromUrl ||
                 ($authData['used'] ?? false)
             ) {
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ce lien de réinitialisation est invalide ou a déjà été utilisé.'
-                ], 403);
+                return redirect('http://localhost:3000/reset-token-confirmed?status=error&reason=' . urlencode('Ce lien de réinitialisation est invalide ou a déjà été utilisé.'));
             }
 
-            // verefay expiration
+            //  Verify Expiration
             if (now()->gt(\Carbon\Carbon::parse($authData['token_expires_at']))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ce lien a expiré (validité de 1h).'
-                ], 403);
+                return redirect('http://localhost:3000/reset-token-confirmed?status=error&reason=' . urlencode('Ce lien a expiré (validité de 5min).'));
             }
+
+            //  Set confirmed state so they are authorized to submit the new password next
             $authData['confirmed'] = true;
-            // update user info 
             $user->update([
                 'auth_tokens' => $authData
             ]);
-            return response()->json([
-                'success' => true,
-                'message' => 'Token valide. Vous pouvez modifier votre mot de passe.',
-                'data' => [
-                    'email' => $email,
-                    'token' => $tokenFromUrl
-                ]
-            ], 200);
+
+            //   Cleanly redirect with status, email, and token attached as query parameters
+            $successUrl = 'http://localhost:3000/reset-token-confirmed' .
+                '?status=success' .
+                '&email=' . urlencode($email) .
+                '&token=' . urlencode($tokenFromUrl);
+
+            return redirect($successUrl);
         } catch (\Throwable $th) {
-            return response()->json(['success' => false, 'error' => $th->getMessage()], 500);
+            Log::error("Verify Reset Token Error: " . $th->getMessage());
+            return redirect('http://localhost:3000/reset-token-confirmed?status=error&reason=' . urlencode('Une erreur serveur est survenue.'));
         }
     }
+
+
+
     public function checkVerified($email)
     {
         $user = User::where('email', $email)->first();
