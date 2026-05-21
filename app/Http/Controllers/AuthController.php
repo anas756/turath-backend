@@ -35,8 +35,15 @@ class AuthController extends Controller
                     'message' => 'Invalid credentials' 
                 ], 401);
             }
-            if(!$user->confirmed){
-
+            // check the acount confirmation
+            if (!$user->confirmed) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please confirm your email address first.',
+                    'data' => [
+                        'email' => $user->email 
+                    ]
+                ], 403);
             }
             //  Update login metadata
             $user->update([
