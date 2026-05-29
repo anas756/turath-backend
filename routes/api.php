@@ -54,16 +54,10 @@ Route::prefix('auth')->group(function () {
 
 // protected by jwt
 Route::middleware([JwtAuthMiddleware::class])->group(function () {
-
     // auth
     Route::post('logout', [AuthController::class, 'logout']);
-
     // user
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
-        Route::put('{user}', [UserController::class, 'update']);
-        Route::delete('{user}', [UserController::class, 'destroy']);
-    });
+    Route::apiResource('users' , UserController::class)->except('store');
     // categorie
     Route::apiResource('categories', CategorieController::class)->except(['show', 'index']);
     Route::apiResource('book', BookController::class)->except(['show', 'index']);
