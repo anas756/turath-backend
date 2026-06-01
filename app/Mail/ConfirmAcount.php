@@ -42,8 +42,12 @@ class ConfirmAcount extends Mailable
     public function content(): Content
     {
         $title = 'Email Confirmation';
-        $confirmationUrl = url("/api/auth/email-confirm/{$this->user->email}?token=" . urlencode($this->confirmationToken));
-       return new Content(
+        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+        $confirmationUrl = $frontendUrl . '/verify-email?' . http_build_query([
+            'email' => $this->user->email,
+            'token' => $this->confirmationToken 
+        ]);
+               return new Content(
             view: 'users.confirmAcount',
             with: [
                 'title' => $title,

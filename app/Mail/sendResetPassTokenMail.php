@@ -43,8 +43,15 @@ class sendResetPassTokenMail extends Mailable
     public function content(): Content
     {
         $title = 'Email Confirmation';
-        $confirmationUrl = url("/api/auth/verify-reset-token/{$this->user->email}?token=" . urlencode($this->confirmationToken));
-        return new Content(
+       
+        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+
+        
+        $confirmationUrl = $frontendUrl . '/reset-token-confirmed?' . http_build_query([
+            'status' => 'success',
+            'email' => $this->user->email,
+            'token' => $this->confirmationToken
+        ]);        return new Content(
             view: 'users.confirmAcount',
             with: [
                 'title' => $title,

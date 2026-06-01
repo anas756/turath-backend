@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -200,6 +201,35 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Une erreur est survenue lors de l\'envoi.',
                 'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+    public function getProfile()
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found or unauthenticated.'
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id'        => $user->_id ?? $user->id, 
+                    'userName'  => $user->userName,
+                    'email'     => $user->email,
+                    'role'      => $user->role ,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server Error validation failed.',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

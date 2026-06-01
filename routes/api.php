@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 // protected by secret key
 
-// Route::middleware([checkAppTokenSecret::class])->group(function() {
+Route::middleware([checkAppTokenSecret::class])->group(function() {
 
 
 
@@ -56,6 +56,9 @@ Route::prefix('auth')->group(function () {
 Route::middleware([JwtAuthMiddleware::class])->group(function () {
     // auth
     Route::post('logout', [AuthController::class, 'logout']);
+   
+    // get profile 
+    Route::get('/auth/profile', [AuthController::class, 'getProfile']);
     // user
     Route::apiResource('users' , UserController::class)->except('store');
     // categorie
@@ -66,4 +69,4 @@ Route::middleware([JwtAuthMiddleware::class])->group(function () {
 
 
 
-// });
+});
