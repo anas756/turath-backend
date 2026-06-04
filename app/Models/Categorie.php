@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+
 use MongoDB\Laravel\Eloquent\Model;
 
 class Categorie extends Model
@@ -18,7 +19,7 @@ class Categorie extends Model
         'banner',
     ];
     // relations 
-    public function books()  {
-        return $this->hasMany(Book::class , 'categorie_id');
+    public function document()  {
+        return $this->hasMany(Document::class , 'categorie_id');
     }
 }

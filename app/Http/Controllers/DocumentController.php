@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\book\storeRequest;
-use App\Http\Requests\book\updateRequest;
-use App\Models\Book;
-use App\Services\BookServices;
+use App\Http\Requests\document\storeRequest;
+use App\Http\Requests\document\updateRequest;
+use App\Models\Document; 
+use App\Services\DocumentServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
-class BookController extends Controller
+class DocumentController extends Controller
 {
-    protected $bookServices;
+    protected $documentServices;
 
-    public function __construct(BookServices $bookServices)
+    public function __construct(DocumentServices $documentServices)
     {
-        $this->bookServices = $bookServices;
+        $this->documentServices = $documentServices;
     }
 
     /**
@@ -24,17 +24,17 @@ class BookController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $books = $this->bookServices->index();
+            $documents = $this->documentServices->index();
 
             return response()->json([
                 'success' => true,
-                'data' => $books
+                'data' => $documents
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve books.',
-                'error' => $th->getMessage() // Consider removing ->getMessage() in production for security
+                'message' => 'Failed to retrieve documents.',
+                'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -46,17 +46,17 @@ class BookController extends Controller
     {
         try {
             $validated = $request->validated();
-            $book = $this->bookServices->store($validated);
+            $document = $this->documentServices->store($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Book created successfully.',
-                'data' => $book
+                'message' => 'Document created successfully.',
+                'data' => $document
             ], Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create book.',
+                'message' => 'Failed to create document.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -65,21 +65,19 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Book $book): JsonResponse
+    public function show(Document $document): JsonResponse
     {
         try {
-            // Load the relationship before returning. 
-            // Note: Use ->load() on an existing instance instead of ->with()
-            $book->load('categories');
+            $document->load('categorie');
 
             return response()->json([
                 'success' => true,
-                'data' => $book
+                'data' => $document
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve the book.',
+                'message' => 'Failed to retrieve the document.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -88,21 +86,20 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(updateRequest $request, Book $book): JsonResponse
+    public function update(updateRequest $request, Document $document): JsonResponse
     {
         try {
-            // Pass the model instance and validated data to your service layer
-            $updatedBook = $this->bookServices->update($book, $request->validated());
+            $updatedDocument = $this->documentServices->update($document, $request->validated());
 
             return response()->json([
                 'success' => true,
-                'message' => 'Book updated successfully.',
-                'data' => $updatedBook
+                'message' => 'Document updated successfully.',
+                'data' => $updatedDocument
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update book.',
+                'message' => 'Failed to update document.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -111,20 +108,19 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Book $book): JsonResponse
+    public function destroy(Document $document): JsonResponse
     {
         try {
-            // Pass the model instance to your service delete method
-            $this->bookServices->delete($book);
+            $this->documentServices->delete($document);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Book deleted successfully.'
+                'message' => 'Document deleted successfully.'
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete book.',
+                'message' => 'Failed to delete document.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

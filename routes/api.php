@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BookContentController;
-use App\Http\Controllers\BookController;
+use App\Http\Controllers\DocumentContentController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
@@ -15,58 +15,53 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 */
-// protected by secret key
 
-Route::middleware([checkAppTokenSecret::class])->group(function() {
+Route::middleware([checkAppTokenSecret::class])->group(function () {
 
+    // Auth
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [UserController::class, 'store']);
 
+    // Categorie (Public)
+    Route::apiResource('categories', CategorieController::class)
+        ->only(['show', 'index']);
 
+    // Documents (Public)
+    Route::apiResource('library/docs', DocumentController::class)
+        ->only(['show', 'index']);
 
-// auth 
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [UserController::class, 'store']);
-// categorie
-Route::apiResource('categories', CategorieController::class)
-    ->only(['show', 'index']);
-// books
-Route::apiResource('book', BookController::class)->only(['show', 'index']);
-// search book using word 
-Route::get('search/library', [BookContentController::class, 'searchLibrer']);
+    // Search global (using word)
+    Route::get('search/library', [DocumentContentController::class, 'searchLibrary']);
 
-// search inside book and get book content
-Route::prefix('books/{book_id}')->group(function () {
-    Route::get('pages', [BookContentController::class, 'getContentByBook']);
-    Route::get('search', [BookContentController::class, 'searchInsideBook']);
-});
+    // Search inside docs and get docs content
+    Route::prefix('/library/docs/{document_id}')->group(function () {
+        Route::get('pages', [DocumentContentController::class, 'getContentByDocument']);
+        Route::get('search', [DocumentContentController::class, 'searchInsideDocument']);
+    });
 
-// auth
-Route::prefix('auth')->group(function () {
-    // acount confirmation
-    Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
-    Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
-    Route::get('email-verified/{email}', [emailConfirmation::class, 'checkVerified']);
-    // password reset
-    Route::post('forgot-password', [AuthController::class, 'sendResetPassToken']);
-    Route::get('verify-reset-token/{email}', [emailConfirmation::class, 'verifyResetToken']);
-    Route::post('reset-password', [UserController::class, 'updatePassword']);
-});
+    // Auth flows
+    Route::prefix('auth')->group(function () {
+        Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
+        Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
+        Route::get('email-verified/{email}', [emailConfirmation::class, 'checkVerified']);
+        Route::post('forgot-password', [AuthController::class, 'sendResetPassToken']);
+        Route::get('verify-reset-token/{email}', [emailConfirmation::class, 'verifyResetToken']);
+        Route::post('reset-password', [UserController::class, 'updatePassword']);
+    });
 
+    // Protected by JWT
+    Route::middleware([JwtAuthMiddleware::class])->group(function () {
+        // Auth
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('/auth/profile', [AuthController::class, 'getProfile']);
 
-// protected by jwt
-Route::middleware([JwtAuthMiddleware::class])->group(function () {
-    // auth
-    Route::post('logout', [AuthController::class, 'logout']);
-   
-    // get profile 
-    Route::get('/auth/profile', [AuthController::class, 'getProfile']);
-    // user
-    Route::apiResource('users' , UserController::class)->except('store');
-    // categorie
-    Route::apiResource('categories', CategorieController::class)->except(['show', 'index']);
-    Route::apiResource('book', BookController::class)->except(['show', 'index']);
-});
-    
+        // User CRUD
+        Route::apiResource('users', UserController::class)->except('store');
 
+        // Categorie CRUD
+        Route::apiResource('categories', CategorieController::class)->except(['show', 'index']);
 
-
+        // Document CRUD (Protected)
+        Route::apiResource('library/docs', DocumentController::class)->except(['show', 'index']);
+    });
 });

@@ -2,54 +2,53 @@
 
 namespace App\Services;
 
-use App\Models\BookContent;
+use App\Models\DocumentContent;
 
-class BookContentServices
+class DocumentContentServices
 {
     /**
      * Get content page-by-page.
      */
-    public function getContentByBook($book_id)
+    public function getContentByDocument($document_id)
     {
-        // Fixed: changed 'page_number' argument inside paginate to 1 page per view
-        return BookContent::where('book_id', $book_id)
+        return DocumentContent::where('document_id', $document_id)
             ->orderBy('page_number', 'asc')
             ->paginate(1);
     }
 
     /**
-     * Search inside a targeted book.
+     * Search inside a targeted document.
      */
-    public function searchInsideBook($keyWord, $book_id)
+    public function searchInsideDocument($keyWord, $document_id)
     {
-        return BookContent::where('book_id', $book_id)
+        return DocumentContent::where('document_id', $document_id)
             ->where('content', 'like', '%' . $keyWord . '%')
             ->orderBy('page_number', 'asc')
             ->get(['page_number', 'content']);
     }
 
     /**
-     * Search across all book contents and group matches neatly by book.
+     * Search across all document contents and group matches neatly by document.
      */
-    public function searchLibrer($keyWord)
+    public function searchLibrary($keyWord)
     {
-        // Fetch matching documents with parent metadata
-        $rawResults = BookContent::where('content', 'like', '%' . $keyWord . '%')
-            ->with('book')
+        // Fetch matching documents with parent metadata (assuming relationship 'document' exists in DocumentContent model)
+        $rawResults = DocumentContent::where('content', 'like', '%' . $keyWord . '%')
+            ->with('document')
             ->get();
 
-        //  Transform collection to group cleanly by book_id for the user interface
-        return $rawResults->groupBy('book_id')->map(function ($pages) {
-            $book = $pages->first()->book;
+        // Transform collection to group cleanly by document_id
+        return $rawResults->groupBy('document_id')->map(function ($pages) {
+            $document = $pages->first()->document;
 
             return [
-                'book_id'     => $book?->id,
-                'book_title'  => $book?->title,
-                'cover'       => $book?->cover,
-                'matches'     => $pages->map(function ($page) {
+                'document_id'   => $document?->id,
+                'title'         => $document?->title,
+                'cover_url'     => $document?->cover_url,
+                'matches'       => $pages->map(function ($page) {
                     return [
                         'page_number' => $page->page_number,
-                        'snippet'     => mb_strimwidth($page->content, 0, 120, '...') 
+                        'snippet'     => mb_strimwidth($page->content, 0, 120, '...')
                     ];
                 })
             ];

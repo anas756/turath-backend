@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\BookContentServices;
+use App\Services\DocumentContentServices;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
-class BookContentController extends Controller
+class DocumentContentController extends Controller
 {
-    protected $bookContentServices;
+    protected $documentContentServices;
 
-    public function __construct(BookContentServices $bookContentServices)
+    public function __construct(DocumentContentServices $documentContentServices)
     {
-        $this->bookContentServices = $bookContentServices;
+        $this->documentContentServices = $documentContentServices;
     }
 
     /**
-     * Get paginated pages for a single book.
+     * Get paginated pages for a single document.
      */
-    public function getContentByBook($book_id): JsonResponse
+    public function getContentByDocument($document_id): JsonResponse
     {
         try {
-            $contents = $this->bookContentServices->getContentByBook($book_id);
+            $contents = $this->documentContentServices->getContentByDocument($document_id);
 
             return response()->json([
                 'success' => true,
@@ -31,21 +31,20 @@ class BookContentController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch book contents.',
+                'message' => 'Failed to fetch document contents.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Search for a word inside a single specific book.
+     * Search for a word inside a single specific document.
      */
-    public function searchInsideBook(Request $request, $book_id): JsonResponse
+    public function searchInsideDocument(Request $request, $document_id): JsonResponse
     {
         try {
             $keyWord = $request->query('key_word');
 
-            // Prevent heavy empty queries
             if (empty($keyWord)) {
                 return response()->json([
                     'success' => false,
@@ -53,7 +52,7 @@ class BookContentController extends Controller
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            $content = $this->bookContentServices->searchInsideBook($keyWord, $book_id);
+            $content = $this->documentContentServices->searchInsideDocument($keyWord, $document_id);
 
             return response()->json([
                 'success' => true,
@@ -63,21 +62,20 @@ class BookContentController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error while searching inside the book.',
+                'message' => 'Error while searching inside the document.',
                 'error' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Global library search: search books using a word.
+     * Global library search: search documents using a word.
      */
-    public function searchLibrer(Request $request): JsonResponse
+    public function searchLibrary(Request $request): JsonResponse
     {
         try {
             $keyWord = $request->query('key_word');
 
-            // Prevent heavy empty queries
             if (empty($keyWord)) {
                 return response()->json([
                     'success' => false,
@@ -85,12 +83,12 @@ class BookContentController extends Controller
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            $data = $this->bookContentServices->searchLibrer($keyWord);
+            $data = $this->documentContentServices->searchLibrary($keyWord);
 
             return response()->json([
                 'success' => true,
                 'keyword' => $keyWord,
-                'total_books_found' => count($data),
+                'total_documents_found' => count($data),
                 'data' => $data
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {

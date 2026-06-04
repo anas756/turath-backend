@@ -4,21 +4,24 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 
-class Book extends Model
+class Document extends Model
 {
     protected $connection = 'mongodb';
 
-    protected $collection = 'books';
+    protected $collection = 'documents';
 
+  
     protected $fillable = [
         'title',
-        'open_library_id',
         'description',
-        'authors',
-        'cover',
-        'file_path',
-        'categorie_id',
-        'tags',
+        'authors',           
+        'cover_url',         
+        'file_path',           
+        'source',              
+        'open_library_key',    
+        'categorie_id',       
+        'user_id',             
+        'tags',                
     ];
 
     // relations 
@@ -28,6 +31,6 @@ class Book extends Model
     }
     // book_contents
     public function contents()  {
-        return  $this->hasMany(BookContent::class , 'book_id');
+        return  $this->hasMany(DocumentContent::class , 'book_id');
     }
 }

@@ -4,14 +4,14 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 
-class BookContent extends Model
+class DocumentContent extends Model
 {
     protected $connection = 'mongodb';
 
-    protected $collection = 'book_contents';
+    protected $collection = 'document_contents';
 
     protected $fillable = [
-        'book_id',
+        'document_id',
         'page_number',
         'content',
     ];
@@ -19,8 +19,8 @@ class BookContent extends Model
     /**
      * Get the book that owns this page content.
      */
-    public function book()
+    public function document()
     {
-        return $this->belongsTo(Book::class, 'book_id');
+        return $this->belongsTo(Document::class, 'book_id');
     }
 }

@@ -43,7 +43,7 @@ class ConfirmAcount extends Mailable
     {
         $title = 'Email Confirmation';
         $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
-        $confirmationUrl = $frontendUrl . '/verify-email?' . http_build_query([
+        $confirmationUrl = $frontendUrl . '/email-confirmed?' . http_build_query([
             'email' => $this->user->email,
             'token' => $this->confirmationToken 
         ]);
