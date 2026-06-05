@@ -113,17 +113,10 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
-
         'mongodb' => [
             'driver' => 'mongodb',
-            'host' => env('DB_HOST', 'turath-mongo'),
-            'port' => env('DB_PORT', 27017),
-            'database' => env('DB_DATABASE', 'turath'),
-            'username' => env('DB_USERNAME', ''),
-            'password' => env('DB_PASSWORD', ''),
-            'options' => [
-                'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'),
-            ],
+            'dsn' => env('MONGODB_URI', "mongodb+srv://" . env('DB_USERNAME') . ":" . urlencode(env('DB_PASSWORD')) . "@" . env('DB_HOST') . "/?retryWrites=true&w=majority"),
+            'database' => env('DB_DATABASE', 'pfe'),
         ],
 
     ],

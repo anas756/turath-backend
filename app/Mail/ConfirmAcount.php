@@ -11,9 +11,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ConfirmAcount extends Mailable
+class ConfirmAccount extends Mailable  // Fixed typo
 {
     use Queueable, SerializesModels;
+
     public $user;
     public $confirmationToken;
 
@@ -32,7 +33,7 @@ class ConfirmAcount extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirme ton Email Address',
+            subject: 'Confirme ton adresse Email',
         );
     }
 
@@ -42,17 +43,22 @@ class ConfirmAcount extends Mailable
     public function content(): Content
     {
         $title = 'Email Confirmation';
-        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
-        $confirmationUrl = $frontendUrl . '/email-confirmed?' . http_build_query([
-            'email' => $this->user->email,
-            'token' => $this->confirmationToken 
+
+        
+        $backendUrl = config('app.url', 'http://localhost:8000');
+
+        $confirmationUrl = $backendUrl . "/email-confirmed/" . urlencode($this->user->email) . "?" . http_build_query([
+            'token' => $this->confirmationToken
         ]);
-               return new Content(
-            view: 'users.confirmAcount',
+
+        return new Content(
+            view: 'users.confirmAccount',  
             with: [
                 'title' => $title,
-                'userName' => $this->user->userName,
-                'confirmationUrl' => $confirmationUrl
+                'userName' => $this->user->name, 
+                'confirmationUrl' => $confirmationUrl,
+                'email' => $this->user->email,
+                'token' => $this->confirmationToken
             ]
         );
     }
