@@ -22,9 +22,13 @@ class DocumentServices
      */
     public function store(array $data)
     {
-        // Check if the data array contains a valid uploaded file instance
         if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
             $data['file_path'] = $this->storeFile($data['file_path']);
+        }
+
+        
+        if (isset($data['cover']) && $data['cover'] instanceof UploadedFile) {
+            $data['cover'] = $data['cover']->store('covers', 'public');
         }
 
         return Document::create($data);

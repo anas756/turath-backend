@@ -14,8 +14,8 @@ class Document extends Model
     protected $fillable = [
         'title',
         'description',
-        'authors',           
-        'cover_url',         
+        'authors',
+        'cover',         
         'file_path',           
         'source',              
         'open_library_key',    

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Route::middleware([checkAppTokenSecret::class])->group(function () {
+Route::middleware([checkAppTokenSecret::class])->group(function () {
 
     // Auth
     Route::post('login', [AuthController::class, 'login']);
@@ -64,4 +64,4 @@ use Illuminate\Support\Facades\Route;
         // Document CRUD (Protected)
         Route::apiResource('library/docs', DocumentController::class)->except(['show', 'index']);
     });
-// });
+});
