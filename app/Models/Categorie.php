@@ -18,6 +18,17 @@ class Categorie extends Model
         'icon',
         'banner',
     ];
+    // DELETING SHILED WHEN THE PARENT DELETED
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($categorie) {
+            $categorie->document()->each(function ($document) {
+                $document->delete();
+            });
+        });
+    }
     // relations 
     public function document()  {
         return $this->hasMany(Document::class , 'categorie_id');

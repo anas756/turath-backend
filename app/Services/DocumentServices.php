@@ -55,13 +55,23 @@ class DocumentServices
      */
     public function delete(Document $document)
     {
-        // Check if document has open library key 
         if ($this->hasOpenLibraryId($document)) {
             throw new Exception("Cannot delete documents synced from the Open Library API.");
         }
 
-        // Perform delete
+        // 👇 Delete files from disk before deleting the record
+        $this->deleteDocumentFiles($document);
+
         return $document->delete();
+    }
+
+    /**
+     * Delete both the file and cover of a document from disk.
+     */
+    public function deleteDocumentFiles(Document $document): void
+    {
+        $this->deleteFile($document->file_path);
+        $this->deleteFile($document->cover);
     }
 
     /**

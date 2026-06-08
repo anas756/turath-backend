@@ -19,7 +19,7 @@ class storeRequest extends FormRequest
             'description'  => 'nullable|string',
             'authors'      => 'required|array|min:1',
             'authors.*'    => 'required|string|max:255',
-            'cover'        => 'nullable|file|image|max:5120',  
+            'cover'        => 'sometimes|nullable|file|image|max:5120', 
             'categorie_id' => 'required|string',
             'file_path'    => 'required|file|mimes:pdf,epub,txt|max:102400',
             'tags'         => 'nullable|array',

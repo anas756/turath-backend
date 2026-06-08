@@ -25,6 +25,14 @@ class Document extends Model
     ];
 
     // relations 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($document) {
+            $document->contents()->delete();
+        });
+    }
     // categories
     public function categorie()  {
         return $this->belongsTo(Categorie::class , 'categorie_id');
