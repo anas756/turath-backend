@@ -26,7 +26,7 @@ class Document extends Model
 
     // relations 
     // categories
-    public function categories()  {
+    public function categorie()  {
         return $this->belongsTo(Categorie::class , 'categorie_id');
     }
     // book_contents
