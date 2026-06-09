@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Jobs\StoreDocumentContentJob;
 use App\Models\Document;
 use Exception;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentServices
 {
@@ -26,12 +28,26 @@ class DocumentServices
             $data['file_path'] = $this->storeFile($data['file_path']);
         }
 
-        
         if (isset($data['cover']) && $data['cover'] instanceof UploadedFile) {
             $data['cover'] = $data['cover']->store('covers', 'public');
         }
 
-        return Document::create($data);
+        $document = Document::create($data);
+
+        // dispatch only from here — remove it from the controller
+        StoreDocumentContentJob::dispatch($document);
+
+        return $document;
+    }
+
+    /**
+     * Delete a single file from disk safely.
+     */
+    public function deleteFile(?string $path): void  // ← was missing
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     /**

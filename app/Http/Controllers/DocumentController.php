@@ -47,7 +47,7 @@ class DocumentController extends Controller
         try {
             $validated = $request->validated();
             $document = $this->documentServices->store($validated);
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Document created successfully.',
