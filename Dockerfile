@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
@@ -12,16 +13,23 @@ RUN docker-php-ext-configure intl && docker-php-ext-install intl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_MAX_PARALLEL_HTTP=1
 
 # Set working directory
 WORKDIR /var/www/html
 
 # Copy composer files first for better caching
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --no-progress
+RUN --mount=type=cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
 
 # Copy the rest of the application
 COPY . .
+
+# Run Laravel's package discovery after artisan is available.
+RUN composer dump-autoload --optimize --no-dev
 
 # Expose port
 EXPOSE 8000

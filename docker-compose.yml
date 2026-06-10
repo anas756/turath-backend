@@ -11,9 +11,13 @@ services:
       - "8000:8000"
     volumes:
       - .:/var/www/html
+      - turath-api-vendor:/var/www/html/vendor
     networks:
       - turath-network
 
 networks:
   turath-network:
     driver: bridge
+
+volumes:
+  turath-api-vendor:
