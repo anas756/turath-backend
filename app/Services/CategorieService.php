@@ -12,7 +12,7 @@ class CategorieService
      */
     public function index()
     {
-        return Categorie::with('document')->get();
+        return Categorie::with('documents')->get();
     }
 
     /**

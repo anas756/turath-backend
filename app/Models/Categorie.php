@@ -24,13 +24,13 @@ class Categorie extends Model
         parent::boot();
 
         static::deleting(function ($categorie) {
-            $categorie->document()->each(function ($document) {
+            $categorie->documents()->each(function ($document) {
                 $document->delete();
             });
         });
     }
     // relations 
-    public function document()  {
+    public function documents()  {
         return $this->hasMany(Document::class , 'categorie_id');
     }
 }

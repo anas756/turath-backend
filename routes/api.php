@@ -6,6 +6,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MediaController;
 use App\Http\Middleware\checkAppTokenSecret;
 use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,7 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         Route::get('search', [DocumentContentController::class, 'searchInsideDocument']);
     });
 
-    // Auth flows
+    // Auth flows (Public)
     Route::prefix('auth')->group(function () {
         Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
         Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
@@ -49,7 +50,7 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         Route::post('reset-password', [UserController::class, 'updatePassword']);
     });
 
-    // Protected by JWT
+    // Protected by JWT (All routes here require authentication)
     Route::middleware([JwtAuthMiddleware::class])->group(function () {
         // Auth
         Route::post('logout', [AuthController::class, 'logout']);
@@ -63,5 +64,13 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
 
         // Document CRUD (Protected)
         Route::apiResource('library/docs', DocumentController::class)->except(['show', 'index']);
+
+        // ========== MEDIA ROUTES (Full CRUD with Authentication) ==========
+        // All media operations require JWT token
+        Route::apiResource('media', MediaController::class);
+
+        // Additional media routes
+        Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete']);
+        Route::put('media/{media}/status', [MediaController::class, 'updateStatus']);
     });
 });

@@ -11,16 +11,13 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-     use HasFactory, Notifiable, SoftDeletes ,HasApiTokens ;
-   
+    use HasFactory, Notifiable, SoftDeletes, HasApiTokens;
+
     protected $connection = 'mongodb';
     protected $collection = 'users';
 
-   
-
     /**
      * The attributes that are mass assignable.
-     * Removed timestamps from fillable; Laravel handles those automatically.
      */
     protected $fillable = [
         'name',
@@ -40,7 +37,6 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'auth_tokens',
-        
     ];
 
     /**
@@ -56,19 +52,37 @@ class User extends Authenticatable implements JWTSubject
             'last_login' => 'datetime',
         ];
     }
+
     // get JWT key
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
+
     public function getJWTCustomClaims()
     {
         return [];
     }
+
     // check auth id with same user id or role admin
     public function CheckUserAuthOrAdminRole($userAuth)
     {
-        return $this->id ==  $userAuth->id || $userAuth->role == "admin";
+        return $this->id == $userAuth->id || $userAuth->role == "admin";
     }
 
+    /**
+     * ✅ ADD THIS METHOD - Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * ✅ ADD THIS METHOD - Check if user has a specific role
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
 }

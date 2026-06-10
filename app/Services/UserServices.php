@@ -23,7 +23,7 @@ class UserServices
             $data['is_login'] = false;
             $data['last_login'] = null;
             
-            return User::updateOrCreate($data);
+            return User::create($data);
         } catch (Exception $e) {
             Log::error("MongoDB Create Error: " . $e->getMessage());
             throw $e;

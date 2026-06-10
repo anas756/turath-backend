@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Mail\ConfirmAccount;
-use App\Mail\ConfirmAcount;
 use App\Mail\sendResetPassTokenMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;

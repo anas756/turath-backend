@@ -39,6 +39,6 @@ class Document extends Model
     }
     // book_contents
     public function contents()  {
-        return  $this->hasMany(DocumentContent::class , 'book_id');
+        return  $this->hasMany(DocumentContent::class , 'document_id');
     }
 }
