@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentContentController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MediaController;
@@ -73,5 +74,7 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         // Additional media routes
         Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete']);
         Route::put('media/{media}/status', [MediaController::class, 'updateStatus']);
+        // dashboard
+        Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     });
 });

@@ -218,12 +218,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'user' => [
-                    'id'        => $user->_id ?? $user->id, 
-                    'userName'  => $user->userName,
-                    'email'     => $user->email,
-                    'role'      => $user->role ,
-                ]
+                'user' => $user
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
