@@ -65,9 +65,10 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         // Document CRUD (Protected)
         Route::apiResource('library/docs', DocumentController::class)->except(['show', 'index']);
 
-        // ========== MEDIA ROUTES (Full CRUD with Authentication) ==========
         // All media operations require JWT token
-        Route::apiResource('media', MediaController::class);
+        Route::apiResource('media', MediaController::class)->parameters([
+            'media' => 'media' 
+        ]);;
 
         // Additional media routes
         Route::post('media/bulk-delete', [MediaController::class, 'bulkDelete']);
