@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function stats()
     {
-        $now        = Carbon::now();
+        $now              = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
@@ -21,6 +21,7 @@ class DashboardController extends Controller
             'users'     => $this->getStats(User::class, $startOfThisMonth, $startOfLastMonth, $endOfLastMonth),
             'documents' => $this->getStats(Document::class, $startOfThisMonth, $startOfLastMonth, $endOfLastMonth),
             'media'     => $this->getStats(Media::class, $startOfThisMonth, $startOfLastMonth, $endOfLastMonth),
+            'recent'    => $this->getRecent(),
         ];
 
         return response()->json($stats);
@@ -28,9 +29,9 @@ class DashboardController extends Controller
 
     private function getStats(string $model, $startOfThisMonth, $startOfLastMonth, $endOfLastMonth): array
     {
-        $total         = $model::count();
-        $thisMonth     = $model::where('created_at', '>=', $startOfThisMonth)->count();
-        $lastMonth     = $model::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
+        $total     = $model::count();
+        $thisMonth = $model::where('created_at', '>=', $startOfThisMonth)->count();
+        $lastMonth = $model::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
 
         $percentage = 0;
         if ($lastMonth > 0) {
@@ -40,11 +41,52 @@ class DashboardController extends Controller
         }
 
         return [
-            'total'       => $total,
-            'this_month'  => $thisMonth,
-            'last_month'  => $lastMonth,
-            'percentage'  => $percentage,        // e.g. +25.5 or -10.0
-            'trend'       => $percentage >= 0 ? 'up' : 'down',
+            'total'      => $total,
+            'this_month' => $thisMonth,
+            'last_month' => $lastMonth,
+            'percentage' => $percentage,
+            'trend'      => $percentage >= 0 ? 'up' : 'down',
         ];
+    }
+
+    private function getRecent(): array
+    {
+        $users = User::latest()->limit(5)->get()->map(fn($u) => [
+            'type'       => 'user',
+            'title'      => $u->name,
+            'subtitle'   => $u->email,
+            'role'       => $u->role,
+            'created_at' => $u->created_at->toDateTimeString(),
+        ]);
+
+        $documents = Document::with('categorie')->latest()->limit(5)->get()->map(fn($d) => [
+            'type'       => 'document',
+            'title'      => $d->title,
+            'subtitle'   => $d->categorie->name ?? null,
+            'authors'    => $d->authors,
+            'cover'      => $d->cover,
+            'source'     => $d->source,
+            'created_at' => $d->created_at->toDateTimeString(),
+        ]);
+
+        $media = Media::latest()->limit(5)->get()->map(fn($m) => [
+            'type'       => 'media',
+            'title'      => $m->title,
+            'subtitle'   => $m->type,
+            'format'     => $m->format,
+            'size'       => $m->size,
+            'status'     => $m->status,
+            'curator'    => $m->curator,
+            'created_at' => $m->created_at->toDateTimeString(),
+        ]);
+
+        return collect()
+            ->merge($users)
+            ->merge($documents)
+            ->merge($media)
+            ->sortByDesc('created_at')
+            ->take(5)
+            ->values()
+            ->toArray();
     }
 }
