@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware([checkAppTokenSecret::class])->group(function () {
+// Route::middleware([checkAppTokenSecret::class])->group(function () {
 
     // Auth
     Route::post('login', [AuthController::class, 'login']);
@@ -89,4 +89,4 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
 
         Route::delete('/{type}/{favorable_id}', [FavoriteController::class, 'destroy']);
     });
-});
+// });
