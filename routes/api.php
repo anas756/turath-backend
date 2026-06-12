@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentContentController;
 use App\Http\Controllers\DocumentController;
@@ -80,5 +81,12 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
 
         // Open Library background import
         Route::post('open-library/sync', OpenLibrarySyncController::class);
+
+        Route::get('/', [FavoriteController::class, 'index']);  // all data + counts
+
+        Route::post('/document', [FavoriteController::class, 'storeDocument']);  // add document
+        Route::post('/media',    [FavoriteController::class, 'storeMedia']);     // add media
+
+        Route::delete('/{type}/{favorable_id}', [FavoriteController::class, 'destroy']);
     });
 });
