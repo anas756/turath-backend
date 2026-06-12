@@ -53,6 +53,7 @@ class DashboardController extends Controller
     {
         $users = User::latest()->limit(5)->get()->map(fn($u) => [
             'type'       => 'user',
+            '_id'=> $u->_id,
             'title'      => $u->name,
             'subtitle'   => $u->email,
             'role'       => $u->role,
@@ -61,6 +62,7 @@ class DashboardController extends Controller
 
         $documents = Document::with('categorie')->latest()->limit(5)->get()->map(fn($d) => [
             'type'       => 'document',
+            '_id' => $d->_id,
             'title'      => $d->title,
             'subtitle'   => $d->categorie->name ?? null,
             'authors'    => $d->authors,
@@ -71,6 +73,7 @@ class DashboardController extends Controller
 
         $media = Media::latest()->limit(5)->get()->map(fn($m) => [
             'type'       => 'media',
+            '_id' => $m->_id,
             'title'      => $m->title,
             'subtitle'   => $m->type,
             'format'     => $m->format,
