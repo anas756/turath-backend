@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware([checkAppTokenSecret::class])->group(function () {
+// Route::middleware([checkAppTokenSecret::class])->group(function () {
 
     // Auth
     Route::post('login', [AuthController::class, 'login']);
@@ -81,4 +81,4 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         // Open Library background import
         Route::post('open-library/sync', OpenLibrarySyncController::class);
     });
-});
+// });
