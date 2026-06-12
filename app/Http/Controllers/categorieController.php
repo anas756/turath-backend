@@ -51,7 +51,8 @@ class CategorieController extends Controller
      */
     public function show(Categorie $category): JsonResponse
     {
-        $category->load('books');
+        $category->load('documents');
+
         return response()->json([
             'success' => true,
             'data' => $category

@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'open_library' => [
+        'base_url' => env('OPEN_LIBRARY_BASE_URL', 'https://openlibrary.org'),
+        'user_agent' => env('OPEN_LIBRARY_USER_AGENT', 'TurathBackend (configure OPEN_LIBRARY_USER_AGENT)'),
+        'sync_subjects' => env('OPEN_LIBRARY_SYNC_SUBJECTS', 'history,literature'),
+        'sync_limit' => (int) env('OPEN_LIBRARY_SYNC_LIMIT', 20),
+        'sync_ebooks_only' => filter_var(env('OPEN_LIBRARY_SYNC_EBOOKS_ONLY', false), FILTER_VALIDATE_BOOLEAN),
+        'request_delay_microseconds' => (int) env('OPEN_LIBRARY_REQUEST_DELAY_MICROSECONDS', 350000),
+        'queue_connection' => env('OPEN_LIBRARY_QUEUE_CONNECTION', 'background'),
+        'queue' => env('OPEN_LIBRARY_QUEUE', 'open-library'),
+    ],
+
 ];

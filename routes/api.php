@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\OpenLibrarySyncController;
 use App\Http\Middleware\checkAppTokenSecret;
 use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -76,5 +77,8 @@ Route::middleware([checkAppTokenSecret::class])->group(function () {
         Route::put('media/{media}/status', [MediaController::class, 'updateStatus']);
         // dashboard
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+        // Open Library background import
+        Route::post('open-library/sync', OpenLibrarySyncController::class);
     });
 });
