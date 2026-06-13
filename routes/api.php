@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentContentController;
 use App\Http\Controllers\DocumentController;
@@ -42,8 +43,8 @@ use Illuminate\Support\Facades\Route;
         Route::get('pages', [DocumentContentController::class, 'getContentByDocument']);
         Route::get('search', [DocumentContentController::class, 'searchInsideDocument']);
     });
-
-    // Auth flows (Public)
+// routes/api.php
+    Route::get('/landing/preview', [LandingController::class, 'preview']);    // Auth flows (Public)
     Route::prefix('auth')->group(function () {
         Route::get('email-confirm/{email}', [emailConfirmation::class, 'confirmingEmail']);
         Route::post('resend-confirmation', [AuthController::class, 'manualSendEmailValidation']);
