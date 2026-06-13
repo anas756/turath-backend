@@ -11,6 +11,7 @@ use App\Http\Controllers\emailConfirmation;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OpenLibrarySyncController;
+use App\Http\Controllers\PublicSearchController;
 use App\Http\Middleware\checkAppTokenSecret;
 use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 
     // Search global (using word)
     Route::get('search/library', [DocumentContentController::class, 'searchLibrary']);
+    Route::get('search/public', PublicSearchController::class);
 
     // Search inside docs and get docs content
     Route::prefix('/library/docs/{document_id}')->group(function () {

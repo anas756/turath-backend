@@ -65,14 +65,14 @@ class DocumentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Document $document): JsonResponse
+    public function show(Document $doc): JsonResponse
     {
         try {
-            $document->load('categorie');
+            $doc->load('categorie');
 
             return response()->json([
                 'success' => true,
-                'data' => $document
+                'data' => $doc
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
@@ -86,10 +86,10 @@ class DocumentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(updateRequest $request, Document $document): JsonResponse
+    public function update(updateRequest $request, Document $doc): JsonResponse
     {
         try {
-            $updatedDocument = $this->documentServices->update($document, $request->validated());
+            $updatedDocument = $this->documentServices->update($doc, $request->validated());
 
             return response()->json([
                 'success' => true,
@@ -108,10 +108,17 @@ class DocumentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Document $document): JsonResponse
+    public function destroy(Document $doc): JsonResponse
     {
         try {
-            $this->documentServices->delete($document);
+            $deleted = $this->documentServices->delete($doc);
+
+            if (!$deleted) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document could not be deleted.'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
             return response()->json([
                 'success' => true,

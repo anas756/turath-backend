@@ -15,9 +15,12 @@ class storeRequest extends FormRequest
     {
         return [
             'title'    => 'required|string|max:255',
-            'type'     => 'required|string|in:image,video,audio,document',
+            'type'     => 'required|string|in:image,video,audio',
             'file_path' => 'required|file|max:102400',
             'curator'  => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:6000',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
             'status'   => 'nullable|string|in:active,archived,processing',
         ];
     }
@@ -27,7 +30,7 @@ class storeRequest extends FormRequest
         return [
             'title.required'     => 'The media title is required.',
             'type.required'      => 'Media type is required.',
-            'type.in'            => 'Media type must be image, video, audio, or document.',
+            'type.in'            => 'Media type must be image, video, or audio.',
             'file_path.required' => 'A media file is required.',
             'file_path.file'     => 'The uploaded media must be a valid file.',
             'file_path.max'      => 'The media file must not exceed 100MB.',

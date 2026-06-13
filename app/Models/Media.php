@@ -17,6 +17,8 @@ class Media extends Model
         'resolution',
         'size',
         'curator',
+        'description',
+        'tags',
         'status',
         'file_path',
         'user_id',
@@ -28,6 +30,7 @@ class Media extends Model
         'date_added' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'tags' => 'array',
     ];
 
     protected $attributes = [

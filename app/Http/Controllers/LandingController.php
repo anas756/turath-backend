@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use App\Models\Media;
+use App\Models\Categorie;
 use Illuminate\Http\JsonResponse;
 
 class LandingController extends Controller
@@ -33,11 +34,8 @@ class LandingController extends Controller
         }
 
         $collections = [
-            'documents' => Document::latest()->limit(2)->get(),
-            'media'     => Media::active()
-                ->where('type', '!=', 'collection')
+            'categories' => Categorie::with('documents')
                 ->latest()
-                ->limit(2)
                 ->get(),
         ];
 

@@ -50,4 +50,9 @@ return [
         'base_url' => env('INTERNET_ARCHIVE_BASE_URL', 'https://archive.org'),
     ],
 
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+        'base_url' => env('YOUTUBE_API_BASE_URL', 'https://www.googleapis.com/youtube/v3'),
+    ],
+
 ];
