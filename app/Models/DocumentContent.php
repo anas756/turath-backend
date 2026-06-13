@@ -14,6 +14,8 @@ class DocumentContent extends Model
         'document_id',
         'page_number',
         'content',
+        'type',
+        'source',
     ];
 
     /**

@@ -3,13 +3,16 @@ FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip libssl-dev pkg-config \
-    libicu-dev
+    libicu-dev poppler-utils tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra tesseract-ocr-ara
 
 # Install MongoDB extension
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
 # Install intl extension (needed for Laravel)
 RUN docker-php-ext-configure intl && docker-php-ext-install intl
+
+# Match Laravel's 100MB media upload validation limit.
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

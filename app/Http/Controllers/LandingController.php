@@ -13,14 +13,32 @@ class LandingController extends Controller
     {
         $documents = Document::latest()->limit(3)->get();
 
-        $media = Media::where('type', '!=', 'collection')
+        $featuredVideo = Media::active()
+            ->where('type', 'video')
             ->latest()
-            ->limit(3)
+            ->first();
+
+        $media = Media::active()
+            ->where('type', '!=', 'collection')
+            ->latest()
+            ->limit($featuredVideo ? 6 : 5)
             ->get();
+
+        if ($featuredVideo) {
+            $media = $media
+                ->reject(fn ($item) => (string) $item->getKey() === (string) $featuredVideo->getKey())
+                ->prepend($featuredVideo)
+                ->take(5)
+                ->values();
+        }
 
         $collections = [
             'documents' => Document::latest()->limit(2)->get(),
-            'media'     => Media::where('type', '!=', 'collection')->latest()->limit(2)->get(),
+            'media'     => Media::active()
+                ->where('type', '!=', 'collection')
+                ->latest()
+                ->limit(2)
+                ->get(),
         ];
 
         return response()->json([
@@ -30,6 +48,7 @@ class LandingController extends Controller
                 'media'       => $media,
                 'collections' => $collections,
             ],
-        ]);
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 }

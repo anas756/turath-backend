@@ -67,8 +67,9 @@ class StoreDocumentContentJob implements ShouldQueue, ShouldBeUnique
         ]);
 
         try {
-            $contentService->extractAndStore($this->document);
-            Log::info("Done processing document: {$this->document->id}");
+            $result = $contentService->processDocument($this->document);
+
+            Log::info("Done processing document: {$this->document->id}", $result);
         } catch (\Throwable $e) {
             // Re-throw to allow the queue to handle retries/failures
             Log::error("Error processing document {$this->document->id}: " . $e->getMessage());

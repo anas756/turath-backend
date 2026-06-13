@@ -83,11 +83,11 @@ use Illuminate\Support\Facades\Route;
         // Open Library background import
         Route::post('open-library/sync', OpenLibrarySyncController::class);
 
-        Route::get('/', [FavoriteController::class, 'index']);  // all data + counts
-
-        Route::post('/document', [FavoriteController::class, 'storeDocument']);  // add document
-        Route::post('/media',    [FavoriteController::class, 'storeMedia']);     // add media
-
-        Route::delete('/{type}/{favorable_id}', [FavoriteController::class, 'destroy']);
+        Route::prefix('favorites')->group(function () {
+            Route::get('/', [FavoriteController::class, 'index']);  // all data + counts
+            Route::post('/document', [FavoriteController::class, 'storeDocument']);  // add document
+            Route::post('/media', [FavoriteController::class, 'storeMedia']);     // add media
+            Route::delete('/{type}/{favorable_id}', [FavoriteController::class, 'destroy']);
+        });
     });
 // });
